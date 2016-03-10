@@ -17,7 +17,7 @@ DRUPAL_ROOT=/path/to/drupalroot
 DATE=$(date +%Y%m%d-%H%M)
 
 echo
-echo -e "\033[2mDrupal Deploy Script v0.1\033[0m"
+echo -e "\033[2mDrupal Deploy Script v1.0\033[0m"
 
 # Function to display current status in dimmed font
 status_message() {
