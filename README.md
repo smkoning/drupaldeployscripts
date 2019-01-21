@@ -1,3 +1,3 @@
 # drupaldeployscripts
-Drupal Deploy Script for (multi)site
+Drupal 7 Deploy Script for (multi)site
  
