@@ -1,23 +1,17 @@
 #!/bin/bash
 #
-# This script will backup all mysql databases of the multisite in separate .sql.tgz files
-# At the end a file backup will be created also.
 #
 # Dependencies for this script are:
-# - drush 6.x (https://github.com/drush-ops/drush)
+# - drush 8.x (https://github.com/drush-ops/drush)
+# - composer
 # 
-# Drush extensions:
-# - Registry Rebuild 7.x (https://www.drupal.org/project/registry_rebuild)
-# 
-#
-#
 
 # Variables (please set before using script)
 DRUPAL_ROOT=/path/to/drupalroot
 
 
 echo
-echo -e "\033[2mDrupal Deploy Script v0.1\033[0m"
+echo -e "\033[2mDrupal Deploy Script v1.0.0\033[0m"
 
 # Function to display current status in dimmed font
 status_message() {
@@ -45,6 +39,15 @@ drush_command () {
   fi
 }
 
+# Function to perform composer command and exit on failure
+composer_command () {
+  status_message "$1"
+  composer $2
+  if [[ $? -ne 0 ]]; then
+  echo "composer $2 failed, aborting!"
+  fi
+}
+
 # Goto drupalroot
 cd $DRUPAL_ROOT
 
@@ -55,20 +58,23 @@ do
         then
                 echo
                 echo "=============== $site ==============";
-
+                # Composer commands
+                composer_command "Update Drupal Core first" "-l $site update drupal/core --with-dependencies"
+                
                 # Drush commands
-                drush_command "Rebuild Drupal registry" "-l $site rr"
                 drush_command "Perform Drupal database updates" "-l $site updb -y"
-
-                # Drush 6.x and later already clear cache after updb
-                if [[ `drush version --pipe` != 6.* ]]; then
-                  drush_command "Clear Drupal caches again because you're not using Drush 6.x" "-l $site cc all"
-                fi
-
-                drush_command "Revert all Drupal features" "-l $site fra -y"
-                drush_command "Clear Drupal caches" "-l $site cc all"
-                drush_command "Retrieving Drupal Feature list" "-l $site fl";
-
+                drush_command "Clear Drupal caches" "-l $site cr"
+                
+                # Composer update contrib modules
+                composer_command "Updating contrib modules" "-1 $site update drupal --with-dependencies"
+                
+                # Drush commands
+                drush_command "Perform Drupal database updates" "-l $site updb -y"
+                drush_command "Clear Drupal caches" "-l $site cr"
+                
+                # Load config YAML files into Drupal
+                drush_command "Loading config into drupal" "-1 $site cim -y"
+                drush_command "Clear Drupal caches" "-1 $site cr"
         fi
 done
 
