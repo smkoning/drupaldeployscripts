@@ -51,21 +51,12 @@ composer_command () {
 # Goto drupalroot
 cd $DRUPAL_ROOT
 
-# loop thru sites directory and perform db backup per vestiging site
-for site in `ls sites`
-do
-        if [ -f sites/$site/settings.php ]
-        then
-                echo
-                echo "=============== $site ==============";
-                # Composer commands
-                composer_command "Update Drupal Core first" "-l $site update drupal/core --with-dependencies"
+# Composer commands
+composer_command "Update Drupal Core first" "-l $site update drupal/core --with-dependencies"
                 
-                # Drush commands
-                drush_command "Perform Drupal database updates" "-l $site updb -y"
-                drush_command "Clear Drupal caches" "-l $site cr"
-        fi
-done
+# Drush commands
+drush_command "Perform Drupal database updates" "-l $site updb -y"
+drush_command "Clear Drupal caches" "-l $site cr"
 
 # All done!
 echo -e "\n\033[32mFinished without errors!\033[0m\n"
