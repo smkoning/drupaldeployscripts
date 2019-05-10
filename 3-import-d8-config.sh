@@ -51,20 +51,11 @@ composer_command () {
 # Goto drupalroot
 cd $DRUPAL_ROOT
 
-# loop thru sites directory and perform db backup per vestiging site
-for site in `ls sites`
-do
-        if [ -f sites/$site/settings.php ]
-        then
-                echo
-                echo "=============== $site ==============";
-                # Drush commands
-                # Load config YAML files into Drupal
-                drush_command "Loading config into drupal" "-1 $site cim -y"
-                drush_command "Perform Drupal database updates" "-l $site updb -y"
-                drush_command "Clear Drupal caches" "-1 $site cr"
-        fi
-done
+# Drush commands
+# Load config YAML files into Drupal
+drush_command "Loading config into drupal" "-1 $site cim -y"
+drush_command "Perform Drupal database updates" "-l $site updb -y"
+drush_command "Clear Drupal caches" "-1 $site cr"
 
 # All done!
 echo -e "\n\033[32mFinished without errors!\033[0m\n"
